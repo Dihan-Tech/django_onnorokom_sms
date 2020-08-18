@@ -10,6 +10,8 @@ import math
 class SMSGateway:
     """OnnorokomSMS has supported 2 types of SMS sending and 1 API for SMS gateway balence check.
        This class holds all those 3 types of methods to perform those API based actions."""
+    low_balance_warning_amount = 20
+    background_process = False
 
     def check_proper_instance_type(self, value, instance_type):
         """Return the value if desired instance meet otherwise raise ValidationError"""
@@ -18,20 +20,22 @@ class SMSGateway:
         else:
             raise ValidationError('The value must be a ' + instance_type.__name__)
 
-    def get_gateway_credentials(self, key_name):
+    def get_gateway_credentials(self, key_name, settings_object=None):
         """This method returns the asked key_name value if exists on the settings file. Raise
            ValidationError if not existed"""
-        if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_CREDENTIALS'):
-            if key_name in settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS:
+        if settings_object is None:
+            settings_object = settings
+        if hasattr(settings_object, 'DJANGO_ONNOROKOM_SMS_CREDENTIALS'):
+            if key_name in settings_object.DJANGO_ONNOROKOM_SMS_CREDENTIALS:
                 if key_name == 'mask_name':
-                    return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
+                    return settings_object.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
                 elif key_name == 'campaign_name':
-                    return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
+                    return settings_object.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
                 else:
-                    if settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name] == '':
+                    if settings_object.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name] == '':
                         raise ValidationError(str(key_name) + ' can not be null')
                     else:
-                        return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
+                        return settings_object.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
             else:
                 raise ValidationError(str(key_name) + ' must have to be on DJANGO_ONNOROKOM_SMS_CREDENTIALS dictionary')
         else:
@@ -43,23 +47,16 @@ class SMSGateway:
         balance = self.client.service.GetCurrentBalance(self.apiKey)
         return balance
 
-    def is_low_balance(self, low_balance_warning_amount=None):
+    def is_low_balance(self):
         """This method check the balance and compare if the balance is below the low balance warning
            amount and return True if it is otherwise False. You have to set 'low_balance_warning_amount'
-           on the DJANGO_ONNOROKOM_SMS_CREDENTIALS dictionary or can be sent on each method call.
-           You do not need to send any arguments if it is declared on the settings file"""
-        if low_balance_warning_amount is None:
-            if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_SETTINGS'):
-                if 'low_balance_warning_amount' in settings.DJANGO_ONNOROKOM_SMS_SETTINGS:
-                    low_balance_warning_amount = self.check_proper_instance_type(settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount'], int)
-                else:
-                    raise ValidationError('low_balance_warning_amount must be on DJANGO_ONNOROKOM_SMS_SETTINGS or can not be null')
-            else:
-                raise ValidationError('DJANGO_ONNOROKOM_SMS_SETTINGS is not present on settings')
-        else:
-            low_balance_warning_amount = self.check_proper_instance_type(low_balance_warning_amount, int)
+           on the DJANGO_ONNOROKOM_SMS_CREDENTIALS dictionary otherwise the default will be counted.
+           The default value is 20"""
+        if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_SETTINGS'):
+            if 'low_balance_warning_amount' in settings.DJANGO_ONNOROKOM_SMS_SETTINGS:
+                self.low_balance_warning_amount = self.check_proper_instance_type(settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount'], int)
         balance = self.check_sms_balance()
-        if int(math.ceil(float(balance))) <= low_balance_warning_amount:
+        if int(math.ceil(float(balance))) <= self.low_balance_warning_amount:
             return True
         else:
             return False

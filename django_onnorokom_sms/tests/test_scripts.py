@@ -17,6 +17,12 @@ class SMSGatewayClassTestCases(TestCase):
         fake_settings_object.DJANGO_ONNOROKOM_SMS_SETTINGS = lambda: None
         setattr(fake_settings_object.DJANGO_ONNOROKOM_SMS_SETTINGS, 'DJANGO_ONNOROKOM_SMS_SETTINGS', {})
         fake_settings_object_list.append(fake_settings_object)
+        return fake_settings_object_list
+
+    def test_default_value(self):
+        """Testing default values"""
+        self.assertEqual(self.test_class_name.low_balance_warning_amount, 20)
+        self.assertEqual(self.test_class_name.background_process, False)
 
     def test_check_proper_instance_type(self):
         """Testing check_proper_instance_type method"""
@@ -26,4 +32,7 @@ class SMSGatewayClassTestCases(TestCase):
 
     def test_get_gateway_credentials(self):
         """Testing get_gateway_credentials method"""
+        test_settings_object_list = self.setUp()
+        self.assertRaisesMessage(ValidationError, 'settings file must have a dictionary named DJANGO_ONNOROKOM_SMS_CREDENTIALS',
+                                 self.test_class_name.get_gateway_credentials, key_name='mask_name', settings_object=test_settings_object_list[0])
         self.assertEqual(self.test_class_name.get_gateway_credentials('mask_name'), '')
