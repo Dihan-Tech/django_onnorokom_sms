@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'Token Not found')
+SECRET_KEY = os.getenv('SECRET_KEY', 'SECRET_KEY Not found')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -119,3 +119,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+DJANGO_ONNOROKOM_SMS_SETTINGS = {
+    'url': os.getenv('sms_gateway_url', 'sms_gateway_url Not found'),
+    'api_key': os.getenv('sms_gateway_api_key', 'sms_gateway_api_key Not found'),
+    'username': os.getenv('sms_gateway_username', 'sms_gateway_username Not found'),
+    'password': os.getenv('sms_gateway_password', 'sms_gateway_password Not found'),
+    'mask_name': os.getenv('sms_gateway_mask_name', 'sms_gateway_mask_name Not found'),
+    'campaign_name': os.getenv('sms_gateway_campaign_name', 'sms_gateway_campaign_name Not found')
+}
