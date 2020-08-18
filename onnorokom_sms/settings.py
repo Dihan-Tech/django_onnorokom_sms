@@ -127,5 +127,6 @@ DJANGO_ONNOROKOM_SMS_SETTINGS = {
     'username': os.getenv('sms_gateway_username', 'sms_gateway_username Not found'),
     'password': os.getenv('sms_gateway_password', 'sms_gateway_password Not found'),
     'mask_name': os.getenv('sms_gateway_mask_name', 'sms_gateway_mask_name Not found'),
-    'campaign_name': os.getenv('sms_gateway_campaign_name', 'sms_gateway_campaign_name Not found')
+    'campaign_name': os.getenv('sms_gateway_campaign_name', 'sms_gateway_campaign_name Not found'),
+    'low_balance_warning_amount': 20
 }
