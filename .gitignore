@@ -1,2 +1,11 @@
 .env
 venv
+htmlcov
+.tox
+django_onnorokom_sms.egg-info
+toxtests
+dist
+site
+**/__pycache__
+.pypirc
+build/*
