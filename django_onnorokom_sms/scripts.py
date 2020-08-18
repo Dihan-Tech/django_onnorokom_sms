@@ -11,22 +11,31 @@ class SMSGateway:
     """OnnorokomSMS has supported 2 types of SMS sending and 1 API for SMS gateway balence check.
        This class holds all those 3 types of methods to perform those API based actions."""
 
+    def check_proper_instance_type(self, value, instance_type):
+        """Return the value if desired instance meet otherwise raise ValidationError"""
+        if isinstance(value, instance_type):
+            return value
+        else:
+            raise ValidationError('The value must be a ' + instance_type.__name__)
+
     def get_gateway_credentials(self, key_name):
         """This method returns the asked key_name value if exists on the settings file. Raise
            ValidationError if not existed"""
-        if hasattr(settings.DJANGO_ONNOROKOM_SMS_SETTINGS):
-            if key_name in settings.DJANGO_ONNOROKOM_SMS_SETTINGS:
-                if key_name != 'mask_name' or key_name != 'campaign_name':
-                    if settings.DJANGO_ONNOROKOM_SMS_SETTINGS[key_name] == '':
+        if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_CREDENTIALS'):
+            if key_name in settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS:
+                if key_name == 'mask_name':
+                    return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
+                elif key_name == 'campaign_name':
+                    return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
+                else:
+                    if settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name] == '':
                         raise ValidationError(str(key_name) + ' can not be null')
                     else:
-                        return settings.DJANGO_ONNOROKOM_SMS_SETTINGS[key_name]
-                else:
-                    return settings.DJANGO_ONNOROKOM_SMS_SETTINGS[key_name]
+                        return settings.DJANGO_ONNOROKOM_SMS_CREDENTIALS[key_name]
             else:
-                raise ValidationError(str(key_name) + ' must have to be on DJANGO_ONNOROKOM_SMS_SETTINGS dictionary')
+                raise ValidationError(str(key_name) + ' must have to be on DJANGO_ONNOROKOM_SMS_CREDENTIALS dictionary')
         else:
-            raise ValidationError('settings file must have a dictionary named DJANGO_ONNOROKOM_SMS_SETTINGS')
+            raise ValidationError('settings file must have a dictionary named DJANGO_ONNOROKOM_SMS_CREDENTIALS')
 
     def check_sms_balance(self):
         """This method is responsible for checking the balance of the SMSGateway. This returns
@@ -37,10 +46,20 @@ class SMSGateway:
     def is_low_balance(self, low_balance_warning_amount=None):
         """This method check the balance and compare if the balance is below the low balance warning
            amount and return True if it is otherwise False. You have to set 'low_balance_warning_amount'
-           on the DJANGO_ONNOROKOM_SMS_SETTINGS dictionary or can be sent on each method call.
+           on the DJANGO_ONNOROKOM_SMS_CREDENTIALS dictionary or can be sent on each method call.
            You do not need to send any arguments if it is declared on the settings file"""
+        if low_balance_warning_amount is None:
+            if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_SETTINGS'):
+                if 'low_balance_warning_amount' in settings.DJANGO_ONNOROKOM_SMS_SETTINGS:
+                    low_balance_warning_amount = self.check_proper_instance_type(settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount'], int)
+                else:
+                    raise ValidationError('low_balance_warning_amount must be on DJANGO_ONNOROKOM_SMS_SETTINGS or can not be null')
+            else:
+                raise ValidationError('DJANGO_ONNOROKOM_SMS_SETTINGS is not present on settings')
+        else:
+            low_balance_warning_amount = self.check_proper_instance_type(low_balance_warning_amount, int)
         balance = self.check_sms_balance()
-        if int(math.ceil(float(balance))) <= settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount']:
+        if int(math.ceil(float(balance))) <= low_balance_warning_amount:
             return True
         else:
             return False

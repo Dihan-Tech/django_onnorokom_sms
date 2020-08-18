@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_onnorokom_sms',
 ]
 
 MIDDLEWARE = [
@@ -121,12 +122,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-DJANGO_ONNOROKOM_SMS_SETTINGS = {
+DJANGO_ONNOROKOM_SMS_CREDENTIALS = {
     'url': os.getenv('sms_gateway_url', 'sms_gateway_url Not found'),
     'api_key': os.getenv('sms_gateway_api_key', 'sms_gateway_api_key Not found'),
     'username': os.getenv('sms_gateway_username', 'sms_gateway_username Not found'),
     'password': os.getenv('sms_gateway_password', 'sms_gateway_password Not found'),
     'mask_name': os.getenv('sms_gateway_mask_name', 'sms_gateway_mask_name Not found'),
     'campaign_name': os.getenv('sms_gateway_campaign_name', 'sms_gateway_campaign_name Not found'),
-    'low_balance_warning_amount': 20
+}
+
+DJANGO_ONNOROKOM_SMS_SETTINGS = {
+    'low_balance_warning_amount': 20,
+    'background_process': False
 }
