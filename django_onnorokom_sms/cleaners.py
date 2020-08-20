@@ -39,3 +39,15 @@ def check_proper_instance_type(value, instance_type):
         return value
     else:
         raise ValidationError('The value must be a ' + instance_type.__name__)
+
+
+def clean_response_code(response_code):
+    """Clean and prepare response code receives from OnnorokomSMS API"""
+    if response_code.count('||') == 0:
+        return '2000'
+    if response_code.count('/') == 0:
+        return response_code.partition('||')[0]
+    else:
+        for i in range(len(response_code.partition('/'))):
+            result = response_code.partition('/')[i].partition('||')[0]
+        return result

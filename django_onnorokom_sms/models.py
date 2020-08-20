@@ -25,6 +25,7 @@ class DjangoOnnorokomSMSModel(models.Model):
         ('1909', 'Duplicate campaign Name'),
         ('1910', 'Invalid message'),
         ('1911', 'Too many Sms Request. Please try less than 500 in one request'),
+        ('2000', 'Unmatched response code'),
     )
     message_text = models.TextField(verbose_name='Message Text', null=True, blank=True)
     sent_by = models.ForeignKey(get_user_model(), related_name='django_onnorokom_sms_sender',
@@ -54,3 +55,8 @@ class DjangoOnnorokomSMSModel(models.Model):
     def get_timesince(self):
         """This method returns the time difference between today and the SMS sent time"""
         return djtimesince(self.created_at, now()).encode('utf8').replace(b'\xc2\xa0', b' ').decode('utf8')
+
+    def clean(self):
+        if self.response_code.count('/') == 0:
+
+        super().clean()
