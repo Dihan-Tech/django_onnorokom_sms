@@ -4,21 +4,14 @@ try:
     from zeep import Client
 except ImportError:
     print('Zeep is not installed. Please install zeep. To install it please run pip install zeep')
+from .cleaners import check_proper_instance_type
+from .defaults import default_values
 import math
 
 
 class SMSGateway:
     """OnnorokomSMS has supported 2 types of SMS sending and 1 API for SMS gateway balence check.
        This class holds all those 3 types of methods to perform those API based actions."""
-    low_balance_warning_amount = 20
-    background_process = False
-
-    def check_proper_instance_type(self, value, instance_type):
-        """Return the value if desired instance meet otherwise raise ValidationError"""
-        if isinstance(value, instance_type):
-            return value
-        else:
-            raise ValidationError('The value must be a ' + instance_type.__name__)
 
     def get_gateway_credentials(self, key_name, settings_object=None):
         """This method returns the asked key_name value if exists on the settings file. Raise
@@ -54,23 +47,30 @@ class SMSGateway:
            The default value is 20"""
         if hasattr(settings, 'DJANGO_ONNOROKOM_SMS_SETTINGS'):
             if 'low_balance_warning_amount' in settings.DJANGO_ONNOROKOM_SMS_SETTINGS:
-                self.low_balance_warning_amount = self.check_proper_instance_type(settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount'], int)
+                default_values['low_balance_warning_amount'] = check_proper_instance_type(settings.DJANGO_ONNOROKOM_SMS_SETTINGS['low_balance_warning_amount'], int)
         balance = self.check_sms_balance()
-        if int(math.ceil(float(balance))) <= self.low_balance_warning_amount:
+        if int(math.ceil(float(balance))) <= default_values['low_balance_warning_amount']:
             return True
         else:
             return False
 
     # Send a single SMS
-    def send_single_sms(self, smsText, recipientNumber, smsType):
-        result = self.client.service.NumberSms(self.apiKey, smsText, recipientNumber, smsType, self.maskName, self.campaignName)
+    def send_single_sms(self, smsText, recipientNumber, mask_name=None, campaign_name=None, smsType='TEXT'):
+        if mask_name is None:
+            mask_name = self.maskName
+        if campaign_name is None:
+            campaign_name = self.campaignName
+        result = self.client.service.NumberSms(self.apiKey, smsText, recipientNumber, smsType, mask_name, campaign_name)
         return result
 
     # Send multiple SMS
-    def send_multiple_sms(self, smsText, numberList, smsType):
+    def send_multiple_sms(self, smsText, numberList, mask_name=None, campaign_name=None, smsType='TEXT'):
+        if mask_name is None:
+            mask_name = self.maskName
+        if campaign_name is None:
+            campaign_name = self.campaignName
         numberList = ",".join(numberList)
-        print(numberList)
-        result = self.client.service.OneToMany(self.username, self.password, smsText, numberList, smsType, self.maskName, self.campaignName)
+        result = self.client.service.OneToMany(self.username, self.password, smsText, numberList, smsType, mask_name, campaign_name)
         return result
 
     def __init__(self):

@@ -41,17 +41,6 @@ class SMSGatewayClassTestCases(TestCase):
         fake_settings_object_list.append(fake_settings_object)
         return fake_settings_object_list
 
-    def test_default_value(self):
-        """Testing default values"""
-        self.assertEqual(self.test_class_name.low_balance_warning_amount, 20)
-        self.assertEqual(self.test_class_name.background_process, False)
-
-    def test_check_proper_instance_type(self):
-        """Testing check_proper_instance_type method"""
-        self.assertEqual(self.test_class_name.check_proper_instance_type(23, int), 23)
-        self.assertEqual(self.test_class_name.check_proper_instance_type('hello', str), 'hello')
-        self.assertRaisesMessage(ValidationError, 'The value must be a str', self.test_class_name.check_proper_instance_type, value=23, instance_type=str)
-
     def test_get_gateway_credentials(self):
         """Testing get_gateway_credentials method"""
         test_settings_object_list = self.setUp()

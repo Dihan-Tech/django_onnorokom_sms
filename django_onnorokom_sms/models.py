@@ -11,8 +11,21 @@ class DjangoOnnorokomSMSModel(models.Model):
        when the message has sent. sent_to is a text which helds the data of a signle of multiple receipts
        number, mask_name and campaign_name holds the corresponding data if nothing used then it will be
        null. sms_purpose is the topics on which that SMS has sent. It is a text field. If not sent then it
-       will be null. Only is_active True messages will be shown on List. status holds the response of the
-       OnnorokomSMS APIs."""
+       will be null. Only is_active True messages will be shown on List. response_code holds the response of the
+       OnnorokomSMS APIs. is_success will be True if the message delivered sucessfully"""
+    RESPONSE_CODES = (
+        ('1900', 'Success'),
+        ('1901', 'Parameter content missing'),
+        ('1902', 'Invalid user/pass'),
+        ('1903', 'Not enough balance'),
+        ('1905', 'Invalid destination number'),
+        ('1906', 'Operator Not found'),
+        ('1907', 'Invalid mask Name'),
+        ('1908', 'Sms body too long'),
+        ('1909', 'Duplicate campaign Name'),
+        ('1910', 'Invalid message'),
+        ('1911', 'Too many Sms Request. Please try less than 500 in one request'),
+    )
     message_text = models.TextField(verbose_name='Message Text', null=True, blank=True)
     sent_by = models.ForeignKey(get_user_model(), related_name='django_onnorokom_sms_sender',
                                 on_delete=models.CASCADE, db_index=True, verbose_name='SMS Sent By')
@@ -20,6 +33,7 @@ class DjangoOnnorokomSMSModel(models.Model):
     sms_purpose = models.TextField(verbose_name='SMS Purpose', null=True, blank=True)
     mask_name = models.CharField(max_length=255, db_index=True, null=True, blank=True, verbose_name='Mask Name')
     campaign_name = models.CharField(max_length=255, db_index=True, null=True, blank=True, verbose_name='Campaign Name')
+    response_code = models.CharField(max_length=80, verbose_name='Response Code', choices=RESPONSE_CODES)
     is_success = models.BooleanField(verbose_name='Status', default=False)
     is_active = models.BooleanField(verbose_name='Active', default=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created at')

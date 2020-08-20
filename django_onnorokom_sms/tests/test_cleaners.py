@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django_onnorokom_sms.cleaners import (get_clean_request_object, get_request_user)
+from django_onnorokom_sms.cleaners import (get_clean_request_object, get_request_user, check_proper_instance_type)
 
 
 class CleanersFunctionsTestCase(TestCase):
@@ -38,3 +38,9 @@ class CleanersFunctionsTestCase(TestCase):
         self.assertEqual(get_request_user(self.get_request_dict['request_object_with_anon_user_object']), None)
         self.assertEqual(get_request_user(self.get_request_dict['request_object_with_valid_user_object']), get_user_model().objects.first())
         self.assertRaisesMessage(ValidationError, 'The request.user object seems to be tempered', get_request_user, self.get_request_dict['request_object_with_fake_user_object'])
+
+    def test_check_proper_instance_type(self):
+        """Testing check_proper_instance_type method"""
+        self.assertEqual(check_proper_instance_type(23, int), 23)
+        self.assertEqual(check_proper_instance_type('hello', str), 'hello')
+        self.assertRaisesMessage(ValidationError, 'The value must be a str', check_proper_instance_type, value=23, instance_type=str)

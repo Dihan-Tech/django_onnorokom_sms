@@ -31,3 +31,11 @@ def get_request_user(request):
                     raise ValidationError('The request.user object seems to be tempered')
         else:
             return None
+
+
+def check_proper_instance_type(value, instance_type):
+    """Return the value if desired instance meet otherwise raise ValidationError"""
+    if isinstance(value, instance_type):
+        return value
+    else:
+        raise ValidationError('The value must be a ' + instance_type.__name__)
