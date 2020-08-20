@@ -13,5 +13,5 @@ class DjangoOnnorokomSMSModelTestCases(TestCase):
         self.model.objects.create(message_text='Less', sent_by=test_user_one, sent_to='01XXXXXXXXX')
 
     def test_model_str_method(self):
-        self.assertEqual(str(get_object_or_404(self.model, id=1)), 'Greater th')
-        self.assertEqual(str(get_object_or_404(self.model, id=2)), 'Less')
+        self.assertEqual(str(get_object_or_404(self.model, pk=1)), 'Greater th')
+        self.assertEqual(str(get_object_or_404(self.model, pk=2)), 'Less')
